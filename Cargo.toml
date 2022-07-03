@@ -6,5 +6,5 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-tract-onnx = "0.17.0"
 image = "0.24.2"
+onnxruntime = "0.0.14"
