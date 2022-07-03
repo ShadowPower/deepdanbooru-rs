@@ -19,9 +19,9 @@ pub fn sampler(rgb_image: &RgbImage, width: u32, height: u32, x: usize, y: usize
 
     let mut scale_x = (x as f64 * radio) as i64 - left;
     let mut scale_y = (y as f64 * radio) as i64 - top;
-    let px_w = (rgb_image.width() as i64 - scale_x).min(1.max(radio as i64)) as u32;
-    let px_h = (rgb_image.height() as i64 - scale_y).min(1.max(radio as i64)) as u32;
 
+    // let px_w = (rgb_image.width() as i64 - scale_x).min(1.max(radio as i64)) as u32;
+    // let px_h = (rgb_image.height() as i64 - scale_y).min(1.max(radio as i64)) as u32;
     // if scale_x < 0 || scale_y < 0 {
     //     return 0f32;
     // } else if scale_x as u32 >= rgb_image.width() || scale_y as u32 >= rgb_image.height() {
@@ -33,6 +33,8 @@ pub fn sampler(rgb_image: &RgbImage, width: u32, height: u32, x: usize, y: usize
 
     scale_x = scale_x.clamp(0, rgb_image.width() as i64 - 1);
     scale_y = scale_y.clamp(0, rgb_image.height() as i64 - 1);
+    let px_w = (rgb_image.width() as i64 - scale_x).min(1.max(radio as i64)) as u32;
+    let px_h = (rgb_image.height() as i64 - scale_y).min(1.max(radio as i64)) as u32;
     let area_rect = Rect { x:scale_x as u32, y: scale_y as u32, width: px_w, height: px_h };
     (area_interpolation(rgb_image, area_rect, channel) as f64 / 255.) as f32
 }
