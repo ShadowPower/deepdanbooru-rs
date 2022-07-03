@@ -39,12 +39,8 @@ pub fn sampler(rgb_image: &RgbImage, width: u32, height: u32, x: usize, y: usize
 
 pub fn area_interpolation(rgb_image: &RgbImage, rect: Rect, channel: usize) -> u8 {
     let (x, y, mut w, mut h) = (rect.x, rect.y, rect.width, rect.height);
-    if w < 1 {
-        w = 1;
-    }
-    if h < 1 {
-        h = 1;
-    }
+    w = 1.max(w);
+    h = 1.max(h);
     let mut sum = 0u64;
     for i in x..x + w {
         for j in y..y + h {
