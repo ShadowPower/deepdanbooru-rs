@@ -7,8 +7,6 @@ use onnxruntime::{
     session::Session, OrtError,
 };
 
-use crate::model::tags;
-
 use super::image_util;
 
 pub struct DeepDanbooru<'a> {
@@ -27,7 +25,7 @@ impl DeepDanbooru<'_> {
         })
     }
 
-    pub fn predict(&mut self, image: &RgbImage) {
+    pub fn predict(&mut self, image: &RgbImage, tag_list: &Vec<String>) {
         let height = 512;
         let width = 512;
         let input_tensor = Array::from_shape_fn(
@@ -42,7 +40,7 @@ impl DeepDanbooru<'_> {
         for i in 0..shape[1] {
             let confidence = outputs[0][[0, i]];
             if confidence > 0.5 {
-                println!("{:>6.2}% {}", confidence * 100., tags::name(i));
+                println!("{:>6.2}% {}", confidence * 100., tag_list[i]);
             }
         }
     }
