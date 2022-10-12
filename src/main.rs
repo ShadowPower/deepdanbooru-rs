@@ -1,11 +1,19 @@
-use std::{path::PathBuf, env};
+use std::{env, path::PathBuf};
 
-use deepdanbooru_rs::model::{image_util, dd::DeepDanbooru, tags};
+use deepdanbooru_rs::model::{
+    dd::{DeepDanbooru, Mode},
+    image_util, tags,
+};
 use onnxruntime::{environment::Environment, LoggingLevel};
 
-fn print_image_tag(model: &mut DeepDanbooru, image_path: &str, tag_list: &Vec<String>) {
+fn print_image_tag(
+    model: &mut DeepDanbooru,
+    image_path: &str,
+    tag_list: &Vec<String>,
+    mode: &Mode,
+) {
     if let Ok(image) = image_util::load(&image_path) {
-        model.predict(&image, tag_list);
+        model.predict(&image, tag_list, mode);
     } else {
         println!("不支持的图片: {}", image_path);
     }
@@ -28,15 +36,38 @@ fn main() {
     let tag_list = tags::load_tags_to_list(tags_path);
 
     let mut args = env::args();
+    let mut mode = Mode::List;
     if env::args().len() > 1 {
-        let image_path = args.nth(1).unwrap();
-        print_image_tag(&mut model, image_path.as_str(), &tag_list);
+        let mut image_path = args.nth(1).unwrap();
+        // 第二项参数可以指定输出模式：prompts, list
+        if vec!["prompts", "list"].contains(&image_path.as_str()) {
+            mode = match image_path.to_ascii_lowercase().as_str() {
+                "prompts" => Mode::Prompts,
+                "list" => Mode::List,
+                _ => mode,
+            };
+            image_path = args
+                .nth(0)
+                .expect("usage: deepdanbooru [prompts|list] <file path>");
+        }
+        print_image_tag(&mut model, image_path.as_str(), &tag_list, &mode);
     } else {
         loop {
             let mut buffer = String::new();
             println!("请输入图片路径: ");
             std::io::stdin().read_line(&mut buffer).unwrap();
-            print_image_tag(&mut model, buffer.trim().trim_matches('"'), &tag_list);
+            match buffer.trim().to_ascii_lowercase().as_str() {
+                "prompts" => mode = Mode::Prompts,
+                "list" => mode = Mode::List,
+                _ => {
+                    print_image_tag(
+                        &mut model,
+                        buffer.trim().trim_matches('"'),
+                        &tag_list,
+                        &mode,
+                    );
+                }
+            }
         }
-    }
+    };
 }
